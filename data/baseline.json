@@ -1,0 +1,14 @@
+{
+    "AWS": {
+        "firewall": "Private",
+        "bucket": "Private"
+    },
+    "Azure": {
+        "firewall": "Private",
+        "bucket": "Private"
+    },
+    "Google Cloud": {
+        "firewall": "Private",
+        "bucket": "Private"
+    }
+}

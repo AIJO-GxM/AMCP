@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Cloud Guardian</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #0f172a;
+            color: white;
+            min-height: 100vh;
+        }
+
+        header {
+            padding: 25px 40px;
+            border-bottom: 1px solid #334155;
+        }
+
+        header h1 {
+            font-size: 30px;
+        }
+
+        header p {
+            color: #94a3b8;
+            margin-top: 6px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: auto;
+            padding: 35px;
+        }
+
+        .summary {
+            background: #1e293b;
+            border-radius: 15px;
+            padding: 30px;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .summary h2 {
+            color: #94a3b8;
+            font-size: 18px;
+        }
+
+        .score {
+            font-size: 60px;
+            font-weight: bold;
+            margin: 15px 0;
+        }
+
+        .status {
+            font-size: 20px;
+            color: #facc15;
+        }
+
+        .cloud-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+        }
+
+        .cloud-card {
+            background: #1e293b;
+            border-radius: 15px;
+            padding: 25px;
+            border: 1px solid #334155;
+        }
+
+        .cloud-card h3 {
+            font-size: 22px;
+            margin-bottom: 15px;
+        }
+
+        .cloud-score {
+            font-size: 40px;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+
+        .alert {
+            padding: 12px;
+            background: #334155;
+            border-radius: 8px;
+            margin-top: 10px;
+            color: #fbbf24;
+        }
+
+        .safe {
+            color: #4ade80;
+        }
+
+        .refresh {
+            margin-top: 30px;
+            text-align: center;
+        }
+
+        button {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        @media (max-width: 800px) {
+            .cloud-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<header>
+    <h1>🛡️ Cloud Guardian</h1>
+    <p>Autonomous Multi-Cloud Security Posture Monitoring</p>
+</header>
+
+<div class="container">
+
+    <div class="summary">
+        <h2>OVERALL SECURITY POSTURE</h2>
+
+        <div class="score" id="overallScore">
+            Loading...
+        </div>
+
+        <div class="status" id="overallStatus">
+            Connecting to Cloud Guardian...
+        </div>
+    </div>
+
+    <div class="cloud-grid" id="cloudContainer">
+        <!-- Cloud cards will appear here -->
+    </div>
+
+    <div class="refresh">
+        <button onclick="loadSecurityData()">
+            🔄 Refresh Security Scan
+        </button>
+    </div>
+
+</div>
+
+<script>
+
+async function loadSecurityData() {
+
+    try {
+
+        const response = await fetch(
+    "http://127.0.0.1:8000/security?t=" + Date.now()
+
+        );
+
+        const data = await response.json();
+
+        let totalScore = 0;
+        let issues = 0;
+
+        const container =
+            document.getElementById("cloudContainer");
+
+        container.innerHTML = "";
+
+        data.forEach(cloud => {
+
+            totalScore += cloud.score;
+
+            if (cloud.alerts.length > 0 &&
+                !cloud.alerts[0].includes("No Security")) {
+
+                issues += cloud.alerts.length;
+            }
+
+            const card =
+                document.createElement("div");
+
+            card.className = "cloud-card";
+
+            let alertsHTML = "";
+
+            cloud.alerts.forEach(alert => {
+
+                const isSafe =
+                    alert.includes("No Security");
+
+                alertsHTML += `
+                    <div class="alert ${isSafe ? "safe" : ""}">
+                        ${alert}
+                    </div>
+                `;
+            });
+
+            card.innerHTML = `
+                <h3>☁️ ${cloud.cloud}</h3>
+
+                <div class="cloud-score">
+                    ${cloud.score}/100
+                </div>
+
+                ${alertsHTML}
+            `;
+
+            container.appendChild(card);
+
+        });
+
+        const overall =
+            Math.round(totalScore / data.length);
+
+        document.getElementById("overallScore")
+            .textContent = overall + "/100";
+
+        let status = "";
+
+        if (overall >= 90) {
+            status = "🟢 LOW RISK";
+        }
+        else if (overall >= 70) {
+            status = "🟡 MEDIUM RISK";
+        }
+        else {
+            status = "🔴 HIGH RISK";
+        }
+
+        document.getElementById("overallStatus")
+            .textContent =
+            status + " • " + issues + " issue(s) detected";
+
+    }
+
+    catch (error) {
+
+        document.getElementById("overallScore")
+            .textContent = "ERROR";
+
+        document.getElementById("overallStatus")
+            .textContent =
+            "Could not connect to Cloud Guardian backend.";
+
+        console.error(error);
+    }
+}
+
+
+loadSecurityData();
+
+</script>
+
+</body>
+</html>
