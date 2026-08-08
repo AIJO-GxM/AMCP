@@ -124,7 +124,7 @@
 <body>
 
 <header>
-    <h1>🛡️ Cloud Guardian</h1>
+    <h1> Cloud Guardian</h1>
     <p>Autonomous Multi-Cloud Security Posture Monitoring</p>
 </header>
 
@@ -148,7 +148,7 @@
 
     <div class="refresh">
         <button onclick="loadSecurityData()">
-            🔄 Refresh Security Scan
+             Refresh Security Scan
         </button>
     </div>
 
@@ -205,7 +205,7 @@ async function loadSecurityData() {
             });
 
             card.innerHTML = `
-                <h3>☁️ ${cloud.cloud}</h3>
+                <h3> ${cloud.cloud}</h3>
 
                 <div class="cloud-score">
                     ${cloud.score}/100
@@ -227,13 +227,13 @@ async function loadSecurityData() {
         let status = "";
 
         if (overall >= 90) {
-            status = "🟢 LOW RISK";
+            status = "LOW RISK";
         }
         else if (overall >= 70) {
-            status = "🟡 MEDIUM RISK";
+            status = "MEDIUM RISK";
         }
         else {
-            status = "🔴 HIGH RISK";
+            status = "HIGH RISK";
         }
 
         document.getElementById("overallStatus")
